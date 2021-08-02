@@ -59,6 +59,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
+var _provider = upcloud.Provider()
+
 var runningControllers = struct {
 	sync.RWMutex
 	mp map[schema.GroupVersionKind]bool
@@ -248,8 +250,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Rules"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         upcloud.Provider(),
-			Resource:         upcloud.Provider().ResourcesMap["upcloud_firewall_rules"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["upcloud_firewall_rules"],
 			TypeName:         "upcloud_firewall_rules",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -266,8 +268,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("IpAddress"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         upcloud.Provider(),
-			Resource:         upcloud.Provider().ResourcesMap["upcloud_floating_ip_address"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["upcloud_floating_ip_address"],
 			TypeName:         "upcloud_floating_ip_address",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -284,8 +286,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Network"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         upcloud.Provider(),
-			Resource:         upcloud.Provider().ResourcesMap["upcloud_network"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["upcloud_network"],
 			TypeName:         "upcloud_network",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -302,8 +304,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Storage"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         upcloud.Provider(),
-			Resource:         upcloud.Provider().ResourcesMap["upcloud_object_storage"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["upcloud_object_storage"],
 			TypeName:         "upcloud_object_storage",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -320,8 +322,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Router"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         upcloud.Provider(),
-			Resource:         upcloud.Provider().ResourcesMap["upcloud_router"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["upcloud_router"],
 			TypeName:         "upcloud_router",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -338,8 +340,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Server"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         upcloud.Provider(),
-			Resource:         upcloud.Provider().ResourcesMap["upcloud_server"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["upcloud_server"],
 			TypeName:         "upcloud_server",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -356,8 +358,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Storage"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         upcloud.Provider(),
-			Resource:         upcloud.Provider().ResourcesMap["upcloud_storage"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["upcloud_storage"],
 			TypeName:         "upcloud_storage",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
@@ -374,8 +376,8 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			Log:              ctrl.Log.WithName("controllers").WithName("Tag"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
-			Provider:         upcloud.Provider(),
-			Resource:         upcloud.Provider().ResourcesMap["upcloud_tag"],
+			Provider:         _provider,
+			Resource:         _provider.ResourcesMap["upcloud_tag"],
 			TypeName:         "upcloud_tag",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
