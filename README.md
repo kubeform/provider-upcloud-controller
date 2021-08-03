@@ -3,7 +3,7 @@
 
 # provider-upcloud-controller
 
-Kubeform controller for [Terraform Upcloud Provider](https://github.com/equinix/terraform-provider-metal)
+Kubeform controller for [Terraform UpCloud Provider](https://github.com/UpCloudLtd/terraform-provider-upcloud)
 
 ## Installation
 
