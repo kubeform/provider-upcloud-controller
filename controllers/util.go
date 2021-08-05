@@ -851,13 +851,13 @@ func updateStateField(rClient client.Client, ctx context.Context, intrfc map[str
 	}
 
 	s := structs.New(typedObj)
-
-	secretData, err := processSensitiveFields(reflect.TypeOf(s.Field("Spec").Field("Resource").Value()), reflect.ValueOf(s.Field("Spec").Field("Resource").Value()))
+	hasAnySensitiveField := false
+	secretData, _, err := processSensitiveFields(reflect.TypeOf(s.Field("Spec").Field("Resource").Value()), reflect.ValueOf(s.Field("Spec").Field("Resource").Value()), &hasAnySensitiveField)
 	if err != nil {
 		return err
 	}
 
-	if len(secretData) != 0 {
+	if hasAnySensitiveField {
 		var secretName string
 
 		secretRef, _, err := unstructured.NestedFieldNoCopy(obj.Object, "spec", "secretRef")
@@ -868,7 +868,7 @@ func updateStateField(rClient client.Client, ctx context.Context, intrfc map[str
 		if secretRef != nil {
 			secretName = s.Field("Spec").Field("SecretRef").Field("Name").Value().(string)
 		} else {
-			secretName = obj.GetName() + "-" + "sensitive"
+			secretName = obj.GetName() + "-" + "upcloud" + "-" + "sensitive"
 		}
 
 		var secret corev1.Secret
@@ -883,38 +883,16 @@ func updateStateField(rClient client.Client, ctx context.Context, intrfc map[str
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      secretName,
 						Namespace: obj.GetNamespace(),
-						OwnerReferences: []metav1.OwnerReference{
-							{
-								APIVersion: obj.GetAPIVersion(),
-								Kind:       obj.GetKind(),
-								Name:       obj.GetName(),
-								Controller: &tr,
-								UID:        obj.GetUID(),
-							},
-						},
 					},
 				})
 				if err != nil {
 					return err
 				}
-			}
-			output := s.Field("Spec").Field("Resource").Value()
-			specByte, err := json.Marshal(output)
-			if err != nil {
+			} else {
 				return err
 			}
-			var specMap map[string]interface{}
-			err = json.Unmarshal(specByte, &specMap)
-			if err != nil {
-				return err
-			}
-			err = unstructured.SetNestedField(obj.Object, specMap, "spec", "state")
-			if err != nil {
-				return err
-			}
-			if err = rClient.Update(ctx, obj); err != nil {
-				return err
-			}
+		}
+		if err := rClient.Get(ctx, req, &secret); err != nil {
 			return err
 		}
 		secret.OwnerReferences = []metav1.OwnerReference{
@@ -965,10 +943,11 @@ func updateStateField(rClient client.Client, ctx context.Context, intrfc map[str
 	return nil
 }
 
-func processSensitiveFields(r reflect.Type, v reflect.Value) (map[string]interface{}, error) {
+func processSensitiveFields(r reflect.Type, v reflect.Value, hasAnySensitiveField *bool) (map[string]interface{}, bool, error) {
 	var err error
 	out := make(map[string]interface{})
 	n := r.NumField()
+	tr := false
 	for i := 0; i < n; i++ {
 		field := r.Field(i)
 		value := v.Field(i)
@@ -979,42 +958,63 @@ func processSensitiveFields(r reflect.Type, v reflect.Value) (map[string]interfa
 
 		if field.Tag.Get("sensitive") == "true" && value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.String && value.Elem().String() != "" {
 			out[tag] = value.Elem().String()
+			*hasAnySensitiveField = true
+			tr = true
 		} else if field.Tag.Get("sensitive") == "true" && value.Kind() == reflect.Map && value.Interface().(map[string]string) != nil && len(value.Interface().(map[string]string)) != 0 {
 			secretJson, err := json.Marshal(value.Interface())
+			*hasAnySensitiveField = true
+			tr = true
 			if err != nil {
-				return nil, err
+				return nil, tr, err
 			} else {
 				out[tag] = string(secretJson)
 			}
 		}
 		if value.Kind() == reflect.Struct {
-			out[tag], err = processSensitiveFields(value.Type(), value)
+			val, isItSen, err := processSensitiveFields(value.Type(), value, hasAnySensitiveField)
 			if err != nil {
-				return nil, err
+				return nil, tr, err
+			}
+			if isItSen {
+				out[tag] = val
+				tr = true
 			}
 		}
 		if value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct {
-			out[tag], err = processSensitiveFields(value.Elem().Type(), value.Elem())
+			val, isItSen, err := processSensitiveFields(value.Elem().Type(), value.Elem(), hasAnySensitiveField)
 			if err != nil {
-				return nil, err
+				return nil, tr, err
+			}
+			if isItSen {
+				out[tag] = val
+				tr = true
 			}
 		}
 
 		if value.Kind() == reflect.Slice {
 			n := value.Len()
 			tempMap := make([]map[string]interface{}, n)
+			tempBool := false
+			var isItSen bool
 			for i := 0; i < n; i++ {
 				if value.Index(i).Kind() == reflect.Struct {
-					tempMap[i], err = processSensitiveFields(value.Index(i).Type(), value.Index(i))
+					tempMap[i], isItSen, err = processSensitiveFields(value.Index(i).Type(), value.Index(i), hasAnySensitiveField)
 					if err != nil {
-						return nil, err
+						return nil, false, err
+					}
+					if isItSen {
+						tempBool = true
+						tr = true
 					}
 				}
 			}
-			out[tag] = tempMap
+			if tempBool {
+				out[tag] = tempMap
+				tr = true
+			}
 		}
 	}
-	return out, nil
+	return out, tr, nil
 }
 
 func setProviderMeta(rClient client.Client, provider *tfschema.Provider, ctx context.Context, unstructuredObj *unstructured.Unstructured, server *tfschema.GRPCProviderServer, jsonit jsoniter.API) error {
