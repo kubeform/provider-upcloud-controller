@@ -840,7 +840,7 @@ kmodules.xyz/resource-metadata/pkg/graph
 # kubeform.dev/apimachinery v0.0.0-20210629153539-7bcd34a30eb5
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
-# kubeform.dev/provider-upcloud-api v0.3.1-0.20210803083813-d09fba53cbdf
+# kubeform.dev/provider-upcloud-api v0.3.1-0.20210804233726-b1a16cbedac6
 ## explicit
 kubeform.dev/provider-upcloud-api/api/provider
 kubeform.dev/provider-upcloud-api/apis/firewall

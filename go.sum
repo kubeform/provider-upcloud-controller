@@ -1103,8 +1103,8 @@ kmodules.xyz/resource-metadata v0.5.7 h1:5xjq5pEp5hZK+jdkY/4wGk/FMtTyvQ9LlErh7lQ
 kmodules.xyz/resource-metadata v0.5.7/go.mod h1:Jdi7zBXRwwFTOR0CxwKxqJhsDVIilhrgNipPjnKLyrs=
 kubeform.dev/apimachinery v0.0.0-20210629153539-7bcd34a30eb5 h1:kpCzsugm64OMYV9ywBIOXbGN7z5ifK+rnGln+f3Gct4=
 kubeform.dev/apimachinery v0.0.0-20210629153539-7bcd34a30eb5/go.mod h1:kfiYdu87pCcrydTGaLXs4QMFx1fLNP5Yov2KxgrkCm0=
-kubeform.dev/provider-upcloud-api v0.3.1-0.20210803083813-d09fba53cbdf h1:5aip2c2/5qx8+//azdjulM9UyYyyFikCNQ3o7dZU1YQ=
-kubeform.dev/provider-upcloud-api v0.3.1-0.20210803083813-d09fba53cbdf/go.mod h1:0skObkSV5qbPNqYO6v21xJCWBXWTeWTVfC+++7ahiKI=
+kubeform.dev/provider-upcloud-api v0.3.1-0.20210804233726-b1a16cbedac6 h1:P/PRdfdO9b/OuFT78jMcqyEFOA64FlfmIIU/crl9lvc=
+kubeform.dev/provider-upcloud-api v0.3.1-0.20210804233726-b1a16cbedac6/go.mod h1:0skObkSV5qbPNqYO6v21xJCWBXWTeWTVfC+++7ahiKI=
 rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=
 sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.15/go.mod h1:LEScyzhFmoF5pso/YSeBstl57mOzx9xlU9n85RGrDQg=
