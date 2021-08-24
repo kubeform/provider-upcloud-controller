@@ -17,9 +17,10 @@ limitations under the License.
 package util
 
 import (
+	"strconv"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/qri-io/jsonpointer"
-	"strconv"
 )
 
 func CheckIfAnyDifference(soFarKey string, keySplit []string, pos, length int, checkIfAnyDiff *bool, temp, tempOld, tempNew map[string]interface{}) {
