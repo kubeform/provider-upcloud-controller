@@ -842,10 +842,11 @@ kmodules.xyz/resource-metadata/hub
 kmodules.xyz/resource-metadata/hub/resourceclasses
 kmodules.xyz/resource-metadata/hub/resourcedescriptors
 kmodules.xyz/resource-metadata/pkg/graph
-# kubeform.dev/apimachinery v0.0.0-20210629153539-7bcd34a30eb5
+# kubeform.dev/apimachinery v0.0.0-20210824104859-ba5604d5a1cc
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
-# kubeform.dev/provider-upcloud-api v0.3.1-0.20210824082518-7301cfb41024
+kubeform.dev/apimachinery/pkg/util
+# kubeform.dev/provider-upcloud-api v0.3.1-0.20210824193911-e21b76d7035f
 ## explicit
 kubeform.dev/provider-upcloud-api/api/provider
 kubeform.dev/provider-upcloud-api/apis/firewall
@@ -865,7 +866,6 @@ kubeform.dev/provider-upcloud-api/apis/storage/v1alpha1
 kubeform.dev/provider-upcloud-api/apis/tag
 kubeform.dev/provider-upcloud-api/apis/tag/v1alpha1
 kubeform.dev/provider-upcloud-api/client/clientset/versioned/scheme
-kubeform.dev/provider-upcloud-api/util
 # sigs.k8s.io/cli-utils v0.25.0
 ## explicit
 sigs.k8s.io/cli-utils/pkg/kstatus/status

@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	base "kubeform.dev/apimachinery/api/v1alpha1"
-	"kubeform.dev/provider-upcloud-api/util"
+	"kubeform.dev/apimachinery/pkg/util"
 
 	jsoniter "github.com/json-iterator/go"
 	"k8s.io/apimachinery/pkg/runtime"
