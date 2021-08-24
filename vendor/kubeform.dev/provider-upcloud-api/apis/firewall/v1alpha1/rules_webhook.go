@@ -20,9 +20,12 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strings"
 
 	base "kubeform.dev/apimachinery/api/v1alpha1"
+	"kubeform.dev/provider-upcloud-api/util"
 
+	jsoniter "github.com/json-iterator/go"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -38,6 +41,24 @@ func (r *Rules) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 var _ webhook.Validator = &Rules{}
 
+var rulesForceNewList = map[string]bool{
+	"/firewall_rule/*/action":                    true,
+	"/firewall_rule/*/comment":                   true,
+	"/firewall_rule/*/destination_address_end":   true,
+	"/firewall_rule/*/destination_address_start": true,
+	"/firewall_rule/*/destination_port_end":      true,
+	"/firewall_rule/*/destination_port_start":    true,
+	"/firewall_rule/*/direction":                 true,
+	"/firewall_rule/*/family":                    true,
+	"/firewall_rule/*/icmp_type":                 true,
+	"/firewall_rule/*/protocol":                  true,
+	"/firewall_rule/*/source_address_end":        true,
+	"/firewall_rule/*/source_address_start":      true,
+	"/firewall_rule/*/source_port_end":           true,
+	"/firewall_rule/*/source_port_start":         true,
+	"/server_id":                                 true,
+}
+
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *Rules) ValidateCreate() error {
 	return nil
@@ -45,6 +66,53 @@ func (r *Rules) ValidateCreate() error {
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *Rules) ValidateUpdate(old runtime.Object) error {
+	if r.Spec.Resource.ID == "" {
+		return nil
+	}
+	newObj := r.Spec.Resource
+	res := old.(*Rules)
+	oldObj := res.Spec.Resource
+
+	jsnitr := jsoniter.Config{
+		EscapeHTML:             true,
+		SortMapKeys:            true,
+		TagKey:                 "tf",
+		ValidateJsonRawMessage: true,
+		TypeEncoders:           GetEncoder(),
+		TypeDecoders:           GetDecoder(),
+	}.Froze()
+
+	byteNew, err := jsnitr.Marshal(newObj)
+	if err != nil {
+		return err
+	}
+	tempNew := make(map[string]interface{})
+	err = jsnitr.Unmarshal(byteNew, &tempNew)
+	if err != nil {
+		return err
+	}
+
+	byteOld, err := jsnitr.Marshal(oldObj)
+	if err != nil {
+		return err
+	}
+	tempOld := make(map[string]interface{})
+	err = jsnitr.Unmarshal(byteOld, &tempOld)
+	if err != nil {
+		return err
+	}
+
+	for key := range rulesForceNewList {
+		keySplit := strings.Split(key, "/*")
+		length := len(keySplit)
+		checkIfAnyDif := false
+		util.CheckIfAnyDifference("", keySplit, 0, length, &checkIfAnyDif, tempOld, tempOld, tempNew)
+		util.CheckIfAnyDifference("", keySplit, 0, length, &checkIfAnyDif, tempNew, tempOld, tempNew)
+
+		if checkIfAnyDif && r.Spec.UpdatePolicy == base.UpdatePolicyDoNotDestroy {
+			return fmt.Errorf(`rules "%v/%v" immutable field can't be updated. To update, change spec.updatePolicy to Destroy`, r.Namespace, r.Name)
+		}
+	}
 	return nil
 }
 

@@ -140,6 +140,24 @@ func reconcile(rClient client.Client, provider *tfschema.Provider, ctx context.C
 					return err
 				}
 			}
+			secretName, found, err := unstructured.NestedString(unstructuredObj.Object, "spec", "secretRef", "name")
+			if err != nil {
+				return err
+			}
+			if found {
+				var secret corev1.Secret
+				req := types.NamespacedName{
+					Namespace: unstructuredObj.GetNamespace(),
+					Name:      secretName,
+				}
+				if err := rClient.Get(ctx, req, &secret); err != nil {
+					return err
+				}
+				delete(secret.Data, "state")
+				if err := rClient.Update(ctx, &secret); err != nil {
+					return err
+				}
+			}
 			return removeFinalizer(ctx, rClient, unstructuredObj, KFCFinalizer)
 		}
 	} else {
@@ -673,8 +691,8 @@ func getStatusWithSensitiveData(gv schema.GroupVersion, rClient client.Client, c
 				return nil, err
 			}
 
-			if _, ok := secret.Data["output"]; ok {
-				err = json.Unmarshal(secret.Data["output"], &secretData)
+			if _, ok := secret.Data["state"]; ok {
+				err = json.Unmarshal(secret.Data["state"], &secretData)
 				if err != nil {
 					return nil, err
 				}
@@ -735,8 +753,8 @@ func getSpecWithSensitiveData(gv schema.GroupVersion, rClient client.Client, ctx
 				return nil, err
 			}
 
-			if _, ok := secret.Data["input"]; ok {
-				err = json.Unmarshal(secret.Data["input"], &secretData)
+			if _, ok := secret.Data["resource"]; ok {
+				err = json.Unmarshal(secret.Data["resource"], &secretData)
 				if err != nil {
 					return nil, err
 				}
@@ -883,6 +901,15 @@ func updateStateField(rClient client.Client, ctx context.Context, intrfc map[str
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      secretName,
 						Namespace: obj.GetNamespace(),
+						OwnerReferences: []metav1.OwnerReference{
+							{
+								APIVersion: obj.GetAPIVersion(),
+								Kind:       obj.GetKind(),
+								Name:       obj.GetName(),
+								Controller: &tr,
+								UID:        obj.GetUID(),
+							},
+						},
 					},
 				})
 				if err != nil {
@@ -895,15 +922,6 @@ func updateStateField(rClient client.Client, ctx context.Context, intrfc map[str
 		if err := rClient.Get(ctx, req, &secret); err != nil {
 			return err
 		}
-		secret.OwnerReferences = []metav1.OwnerReference{
-			{
-				APIVersion: obj.GetAPIVersion(),
-				Kind:       obj.GetKind(),
-				Name:       obj.GetName(),
-				Controller: &tr,
-				UID:        obj.GetUID(),
-			},
-		}
 		if secret.Data == nil {
 			secret.Data = make(map[string][]byte)
 		}
@@ -912,7 +930,7 @@ func updateStateField(rClient client.Client, ctx context.Context, intrfc map[str
 		if err != nil {
 			return err
 		}
-		secret.Data["output"] = secretByte
+		secret.Data["state"] = secretByte
 
 		// apply the update of the object
 		if err = rClient.Update(ctx, &secret); err != nil {

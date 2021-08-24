@@ -39,6 +39,7 @@ import (
 	"kmodules.xyz/client-go/discovery"
 	"kmodules.xyz/client-go/meta"
 	"kmodules.xyz/client-go/tools/cli"
+	"kmodules.xyz/client-go/tools/queue"
 	upcloudscheme "kubeform.dev/provider-upcloud-api/client/clientset/versioned/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -89,7 +90,7 @@ func NewCmdRun(version string) *cobra.Command {
 			}
 			cfg := mgr.GetConfig()
 
-			watchOnlyDefault := true
+			restrictToNamespace := queue.NamespaceDemo
 			if licenseFile != "" {
 				info := license.NewLicenseEnforcer(cfg, licenseFile).LoadLicense()
 				if info.Status != licenseapi.LicenseActive {
@@ -97,7 +98,7 @@ func NewCmdRun(version string) *cobra.Command {
 					os.Exit(1)
 				}
 				if sets.NewString(info.Features...).Has("kubeform-enterprise") {
-					watchOnlyDefault = false
+					restrictToNamespace = ""
 				} else if !sets.NewString(info.Features...).Has("kubeform-community") {
 					setupLog.Error(fmt.Errorf("not a valid license for this product"), "")
 					os.Exit(1)
@@ -124,7 +125,7 @@ func NewCmdRun(version string) *cobra.Command {
 			crdClient := clientset.NewForConfigOrDie(cfg)
 			vwcClient := admissionregistrationv1.NewForConfigOrDie(cfg)
 
-			err = watchCRD(ctx, crdClient, vwcClient, ctx.Done(), mgr, auditor, watchOnlyDefault)
+			err = watchCRD(ctx, crdClient, vwcClient, ctx.Done(), mgr, auditor, restrictToNamespace)
 			if err != nil {
 				setupLog.Error(err, "unable to watch crds")
 				os.Exit(1)
