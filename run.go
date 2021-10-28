@@ -140,6 +140,13 @@ func NewCmdRun(version string) *cobra.Command {
 
 			mgr.GetWebhookServer().Register("/tf", getTF(dClient))
 
+			if auditor != nil {
+				if err := auditor.SetupSiteInfoPublisherWithManager(mgr); err != nil {
+					setupLog.Error(err, "unable to setup site info publisher")
+					os.Exit(1)
+				}
+			}
+
 			setupLog.Info("starting manager")
 			if err := mgr.Start(ctx); err != nil {
 				setupLog.Error(err, "problem running manager")
