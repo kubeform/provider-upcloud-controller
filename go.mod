@@ -8,6 +8,8 @@ require (
 	github.com/go-logr/logr v0.4.0
 	github.com/gobuffalo/flect v0.2.3
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
+	github.com/hashicorp/go-uuid v1.0.2
+	github.com/hashicorp/hcl v1.0.0
 	github.com/hashicorp/terraform-plugin-go v0.3.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/imdario/mergo v0.3.12
@@ -22,11 +24,12 @@ require (
 	k8s.io/api v0.21.1
 	k8s.io/apiextensions-apiserver v0.21.1
 	k8s.io/apimachinery v0.21.1
-	k8s.io/client-go v0.21.1
+	k8s.io/client-go v10.0.0+incompatible
 	k8s.io/klog/v2 v2.8.0
 	kmodules.xyz/client-go v0.0.0-20210822203828-5e9cebbf1dfa
 	kubeform.dev/apimachinery v0.0.0-20210824104859-ba5604d5a1cc
-	kubeform.dev/provider-upcloud-api v0.3.1-0.20210824200144-4d91b1dbc8b6
+	kubeform.dev/provider-upcloud-api v0.3.1-0.20211020085925-02a788c0b00b
+	kubeform.dev/terraform-backend-sdk v0.0.0-20210922115523-21574335f0db
 	sigs.k8s.io/cli-utils v0.25.0
 	sigs.k8s.io/controller-runtime v0.9.0
 )
@@ -46,28 +49,6 @@ replace cloud.google.com/go/firestore => cloud.google.com/go/firestore v1.1.0
 replace cloud.google.com/go/pubsub => cloud.google.com/go/pubsub v1.2.0
 
 replace cloud.google.com/go/storage => cloud.google.com/go/storage v1.6.0
-
-replace github.com/Azure/azure-sdk-for-go => github.com/Azure/azure-sdk-for-go v43.0.0+incompatible
-
-replace github.com/Azure/go-ansiterm => github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
-
-replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v14.2.0+incompatible
-
-replace github.com/Azure/go-autorest/autorest => github.com/Azure/go-autorest/autorest v0.11.12
-
-replace github.com/Azure/go-autorest/autorest/adal => github.com/Azure/go-autorest/autorest/adal v0.9.5
-
-replace github.com/Azure/go-autorest/autorest/date => github.com/Azure/go-autorest/autorest/date v0.3.0
-
-replace github.com/Azure/go-autorest/autorest/mocks => github.com/Azure/go-autorest/autorest/mocks v0.4.1
-
-replace github.com/Azure/go-autorest/autorest/to => github.com/Azure/go-autorest/autorest/to v0.2.0
-
-replace github.com/Azure/go-autorest/autorest/validation => github.com/Azure/go-autorest/autorest/validation v0.1.0
-
-replace github.com/Azure/go-autorest/logger => github.com/Azure/go-autorest/logger v0.2.0
-
-replace github.com/Azure/go-autorest/tracing => github.com/Azure/go-autorest/tracing v0.6.0
 
 replace github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 
@@ -108,8 +89,6 @@ replace github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring =
 replace github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.10.0
 
 replace go.etcd.io/etcd => go.etcd.io/etcd v0.5.0-alpha.5.0.20200910180754-dd1b699fc489
-
-replace google.golang.org/api => google.golang.org/api v0.20.0
 
 replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20201110150050-8816d57aaa9a
 

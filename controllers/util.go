@@ -30,6 +30,7 @@ import (
 	"github.com/fatih/structs"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-cty/cty/msgpack"
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -46,6 +47,22 @@ import (
 	"kmodules.xyz/client-go/meta"
 	base "kubeform.dev/apimachinery/api/v1alpha1"
 	upcloud "kubeform.dev/provider-upcloud-api/api/provider"
+	"kubeform.dev/terraform-backend-sdk/backend"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/artifactory"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/azure"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/consul"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/cos"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/gcs"
+	cloudhttp "kubeform.dev/terraform-backend-sdk/backend/remote-state/http"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/inmem"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/manta"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/pg"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/s3"
+	"kubeform.dev/terraform-backend-sdk/backend/remote-state/swift"
+	"kubeform.dev/terraform-backend-sdk/configs/hcl2shim"
+	"kubeform.dev/terraform-backend-sdk/states"
+	"kubeform.dev/terraform-backend-sdk/states/remote"
+	"kubeform.dev/terraform-backend-sdk/states/statefile"
 	"sigs.k8s.io/cli-utils/pkg/kstatus/status"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -55,6 +72,59 @@ const (
 	UnknownIdValue     = "4856ec62-a372-11eb-bcbc-0242ac130002"
 	UpdateNotSupported = "doesn't support update"
 )
+
+type stateVersionV4 struct{}
+
+func (sv stateVersionV4) MarshalJSON() ([]byte, error) {
+	return []byte{'4'}, nil
+}
+
+func (sv stateVersionV4) UnmarshalJSON([]byte) error {
+	// Nothing to do: we already know we're version 4
+	return nil
+}
+
+type outputStateV4 struct {
+	ValueRaw     json.RawMessage `json:"value"`
+	ValueTypeRaw json.RawMessage `json:"type"`
+	Sensitive    bool            `json:"sensitive,omitempty"`
+}
+
+type resourceStateV4 struct {
+	Module         string                  `json:"module,omitempty"`
+	Mode           string                  `json:"mode"`
+	Type           string                  `json:"type"`
+	Name           string                  `json:"name"`
+	EachMode       string                  `json:"each,omitempty"`
+	ProviderConfig string                  `json:"provider"`
+	Instances      []instanceObjectStateV4 `json:"instances"`
+}
+
+type instanceObjectStateV4 struct {
+	IndexKey interface{} `json:"index_key,omitempty"`
+	Status   string      `json:"status,omitempty"`
+	Deposed  string      `json:"deposed,omitempty"`
+
+	SchemaVersion           uint64            `json:"schema_version"`
+	AttributesRaw           json.RawMessage   `json:"attributes,omitempty"`
+	AttributesFlat          map[string]string `json:"attributes_flat,omitempty"`
+	AttributeSensitivePaths json.RawMessage   `json:"sensitive_attributes,omitempty,"`
+
+	PrivateRaw []byte `json:"private,omitempty"`
+
+	Dependencies []string `json:"dependencies,omitempty"`
+
+	CreateBeforeDestroy bool `json:"create_before_destroy,omitempty"`
+}
+
+type stateV4 struct {
+	Version          stateVersionV4           `json:"version"`
+	TerraformVersion string                   `json:"terraform_version"`
+	Serial           uint64                   `json:"serial"`
+	Lineage          string                   `json:"lineage"`
+	RootOutputs      map[string]outputStateV4 `json:"outputs"`
+	Resources        []resourceStateV4        `json:"resources"`
+}
 
 func StartProcess(rClient client.Client, provider *tfschema.Provider, ctx context.Context, res *tfschema.Resource, gv schema.GroupVersion, unstructuredObj *unstructured.Unstructured, tName string, jsonit jsoniter.API) error {
 	err := initialUpdateStatus(rClient, ctx, gv, unstructuredObj, nil, true)
@@ -83,10 +153,102 @@ func reconcile(rClient client.Client, provider *tfschema.Provider, ctx context.C
 		return err
 	}
 
-	// Get RawStatus (including sensitive data)
-	rawStatus, err := getStatusWithSensitiveData(gv, rClient, ctx, unstructuredObj, jsonit)
+	backendRef, backendfound, err := unstructured.NestedString(unstructuredObj.Object, "spec", "backendRef", "name")
 	if err != nil {
 		return err
+	}
+
+	_, stateFound, err := unstructured.NestedMap(unstructuredObj.Object, "spec", "state")
+	if err != nil {
+		return err
+	}
+
+	// Get RawStatus (including sensitive data)
+	rawStatus := make(map[string]interface{})
+	var remoteClient remote.Client
+	payLoad := &stateV4{}
+
+	if backendfound {
+		remoteClient, err = getRemoteClient(backendRef, rClient, ctx, unstructuredObj, jsonit)
+		if err != nil {
+			return err
+		}
+
+		payloadData, err := getRemoteState(remoteClient)
+		if err != nil {
+			return err
+		}
+
+		if payloadData == nil {
+			payloadData, err = emptyState()
+			if err != nil {
+				return err
+			}
+		}
+
+		err = json.Unmarshal(payloadData, payLoad)
+		if err != nil {
+			return err
+		}
+
+		if len(payLoad.Resources) > 0 && len(payLoad.Resources[0].Instances) > 0 {
+			temp := payLoad.Resources[0].Instances[0].AttributesRaw
+
+			err = json.Unmarshal(temp, &rawStatus)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		rawStatus, err = getStatusWithSensitiveData(gv, rClient, ctx, unstructuredObj, jsonit)
+		if err != nil {
+			return err
+		}
+	}
+
+	if backendfound && stateFound {
+		localState, err := getStatusWithSensitiveData(gv, rClient, ctx, unstructuredObj, jsonit)
+		if err != nil {
+			return err
+		}
+
+		err = storeRemoteState(tName, payLoad, remoteClient, localState, gv, unstructuredObj, jsonit)
+		if err != nil {
+			return err
+		}
+
+		unstructured.RemoveNestedField(unstructuredObj.Object, "spec", "state")
+		if err := rClient.Update(ctx, unstructuredObj); err != nil {
+			return err
+		}
+
+		secName, secFound, err := unstructured.NestedString(unstructuredObj.Object, "spec", "secretRef", "name")
+		if err != nil {
+			return err
+		}
+
+		if secFound {
+			var secret corev1.Secret
+			req := types.NamespacedName{
+				Namespace: unstructuredObj.GetNamespace(),
+				Name:      secName,
+			}
+			if err := rClient.Get(ctx, req, &secret); err != nil {
+				return err
+			}
+
+			delete(secret.Data, "state")
+			if err := rClient.Update(ctx, &secret); err != nil {
+				return err
+			}
+		}
+
+		temp := payLoad.Resources[0].Instances[0].AttributesRaw
+
+		err = json.Unmarshal(temp, &rawStatus)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Get object ID
@@ -140,6 +302,13 @@ func reconcile(rClient client.Client, provider *tfschema.Provider, ctx context.C
 					return err
 				}
 			}
+			if backendfound {
+				// delete the remote state
+				err := deleteRemoteState(remoteClient)
+				if err != nil {
+					return err
+				}
+			}
 			secretName, found, err := unstructured.NestedString(unstructuredObj.Object, "spec", "secretRef", "name")
 			if err != nil {
 				return err
@@ -180,9 +349,17 @@ func reconcile(rClient client.Client, provider *tfschema.Provider, ctx context.C
 		if err != nil {
 			return err
 		}
-		err = updateStateField(rClient, ctx, intrfc.Raw, gv, unstructuredObj, jsonit)
-		if err != nil {
-			return err
+
+		if backendfound {
+			err = storeRemoteState(tName, payLoad, remoteClient, intrfc.Raw, gv, unstructuredObj, jsonit)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = updateStateField(rClient, ctx, intrfc.Raw, gv, unstructuredObj, jsonit)
+			if err != nil {
+				return err
+			}
 		}
 
 		// set the id value in unstructuredObj object
@@ -246,9 +423,17 @@ func reconcile(rClient client.Client, provider *tfschema.Provider, ctx context.C
 		if err != nil {
 			return err
 		}
-		err = updateStateField(rClient, ctx, intrfc.Raw, gv, unstructuredObj, jsonit)
-		if err != nil {
-			return err
+
+		if backendfound {
+			err = storeRemoteState(tName, payLoad, remoteClient, intrfc.Raw, gv, unstructuredObj, jsonit)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = updateStateField(rClient, ctx, intrfc.Raw, gv, unstructuredObj, jsonit)
+			if err != nil {
+				return err
+			}
 		}
 
 		// set the id value in unstructuredObj object
@@ -283,13 +468,224 @@ func reconcile(rClient client.Client, provider *tfschema.Provider, ctx context.C
 
 		intrfc := terraform.NewResourceConfigShimmed(newStateVal, res.CoreConfigSchema())
 
-		err = updateStateField(rClient, ctx, intrfc.Raw, gv, unstructuredObj, jsonit)
-		if err != nil {
-			return err
+		if backendfound {
+			err = storeRemoteState(tName, payLoad, remoteClient, intrfc.Raw, gv, unstructuredObj, jsonit)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = updateStateField(rClient, ctx, intrfc.Raw, gv, unstructuredObj, jsonit)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
+}
+
+func emptyState() ([]byte, error) {
+	newState := states.NewState()
+	lineage, err := uuid.GenerateUUID()
+	if err != nil {
+		return nil, err
+	}
+	serial := 0
+
+	f := statefile.New(newState, lineage, uint64(serial))
+
+	var buf bytes.Buffer
+	err = statefile.Write(f, &buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func storeRemoteState(resourceTypeName string, payLoad *stateV4, remoteClient remote.Client, intrfc map[string]interface{}, gv schema.GroupVersion, obj *unstructured.Unstructured, jsonit jsoniter.API) error {
+	data, err := meta.MarshalToJson(obj, gv)
+	if err != nil {
+		return err
+	}
+
+	typedObj, err := meta.UnmarshalFromJSON(data, gv)
+	if err != nil {
+		return err
+	}
+
+	var raw []byte
+	jsonByte, err := json.Marshal(intrfc)
+	if err != nil {
+		return err
+	}
+
+	raw = append(raw, []byte(`{"spec":{ "resource":`)...)
+	raw = append(raw, jsonByte...)
+	raw = append(raw, []byte(`}}`)...)
+
+	err = jsonit.Unmarshal(raw, &typedObj)
+	if err != nil {
+		return err
+	}
+
+	s := structs.New(typedObj)
+	hasAnySensitiveField := false
+	secretData, _, err := processSensitiveFields(reflect.TypeOf(s.Field("Spec").Field("Resource").Value()), reflect.ValueOf(s.Field("Spec").Field("Resource").Value()), &hasAnySensitiveField)
+	if err != nil {
+		return err
+	}
+
+	output := s.Field("Spec").Field("Resource").Value()
+	specByte, err := jsonit.Marshal(output)
+	if err != nil {
+		return err
+	}
+
+	var specMap map[string]interface{}
+	err = jsonit.Unmarshal(specByte, &specMap)
+	if err != nil {
+		return err
+	}
+
+	if hasAnySensitiveField {
+		if err := mergo.Merge(&specMap, secretData); err != nil {
+			return err
+		}
+	}
+
+	stateData, err := json.Marshal(specMap)
+	if err != nil {
+		return err
+	}
+
+	if len(payLoad.Resources) > 0 && len(payLoad.Resources[0].Instances) > 0 {
+		payLoad.Resources[0].Instances[0].AttributesRaw = stateData
+		payLoad.Serial = payLoad.Serial + 1
+	} else {
+		payLoad.Resources = []resourceStateV4{
+			{
+				Mode:           "managed",
+				Type:           resourceTypeName,
+				Name:           obj.GetName(),
+				ProviderConfig: "provider[\"registry.terraform.io/UpCloudLtd/upcloud\"]",
+				Instances: []instanceObjectStateV4{
+					{
+
+						AttributesRaw: stateData,
+					},
+				},
+			},
+		}
+	}
+
+	storeData, err := json.Marshal(payLoad)
+	if err != nil {
+		return err
+	}
+
+	err = remoteClient.Put(storeData)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func deleteRemoteState(remoteClient remote.Client) error {
+	err := remoteClient.Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getRemoteState(remoteClient remote.Client) ([]byte, error) {
+	payload, err := remoteClient.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	if payload == nil {
+		return nil, nil
+	}
+	return payload.Data, nil
+}
+
+func getRemoteClient(backendRef string, rClient client.Client, ctx context.Context, obj *unstructured.Unstructured, jsonit jsoniter.API) (remote.Client, error) {
+	req := types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      backendRef,
+	}
+	var backendSecret corev1.Secret
+
+	if err := rClient.Get(ctx, req, &backendSecret); err != nil {
+		return nil, err
+	}
+
+	bData := backendSecret.Data
+	var byt []byte
+	var backendName string
+
+	if len(bData) != 1 {
+		return nil, fmt.Errorf("provide only one backend as a backendRef")
+	}
+
+	for key, val := range bData {
+		backendName = key
+		byt = val
+		break
+	}
+
+	tempBObj := make(map[string]interface{})
+
+	err := jsonit.Unmarshal(byt, &tempBObj)
+	if err != nil {
+		return nil, err
+	}
+
+	backendObj := hcl2shim.HCL2ValueFromConfigValue(tempBObj)
+
+	var result backend.Backend
+
+	if backendName == "s3" {
+		result = s3.New()
+	} else if backendName == "gcs" {
+		result = gcs.New()
+	} else if backendName == "azure" {
+		result = azure.New()
+	} else if backendName == "pg" {
+		result = pg.New()
+	} else if backendName == "http" {
+		result = cloudhttp.New()
+	} else if backendName == "manta" {
+		result = manta.New()
+	} else if backendName == "artifactory" {
+		result = artifactory.New()
+	} else if backendName == "consul" {
+		result = consul.New()
+	} else if backendName == "cos" {
+		result = cos.New()
+	} else if backendName == "swift" {
+		result = swift.New()
+	} else if backendName == "inmem" {
+		result = inmem.New()
+	} else {
+		return nil, fmt.Errorf("provide valid cloud for remote backend support")
+	}
+
+	diag := result.Configure(backendObj)
+	if diag.Err() != nil {
+		return nil, diag.Err()
+	}
+
+	state, err := result.StateMgr("default")
+	if err != nil {
+		return nil, err
+	}
+
+	remoteClient := state.(*remote.State).Client
+
+	return remoteClient, nil
 }
 
 func initialUpdateStatus(rClient client.Client, ctx context.Context, gv schema.GroupVersion, obj *unstructured.Unstructured, er error, flag bool) error {

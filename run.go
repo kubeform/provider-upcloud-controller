@@ -30,6 +30,7 @@ import (
 	license "go.bytebuilders.dev/license-verifier/kubernetes"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	admissionregistrationv1 "k8s.io/client-go/kubernetes/typed/admissionregistration/v1"
@@ -122,6 +123,7 @@ func NewCmdRun(version string) *cobra.Command {
 				}, mapper, fn.CreateEvent)
 			}
 
+			dClient := dynamic.NewForConfigOrDie(cfg)
 			crdClient := clientset.NewForConfigOrDie(cfg)
 			vwcClient := admissionregistrationv1.NewForConfigOrDie(cfg)
 
@@ -135,6 +137,8 @@ func NewCmdRun(version string) *cobra.Command {
 			// Start periodic license verification
 			//nolint:errcheck
 			go license.VerifyLicensePeriodically(mgr.GetConfig(), licenseFile, ctx.Done())
+
+			mgr.GetWebhookServer().Register("/tf", getTF(dClient))
 
 			setupLog.Info("starting manager")
 			if err := mgr.Start(ctx); err != nil {
