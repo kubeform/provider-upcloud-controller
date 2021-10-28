@@ -16,17 +16,17 @@ require (
 	github.com/json-iterator/go v1.1.11
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.1.3
-	go.bytebuilders.dev/audit v0.0.7
-	go.bytebuilders.dev/license-verifier v0.9.2
+	go.bytebuilders.dev/audit v0.0.11
+	go.bytebuilders.dev/license-verifier v0.9.3
 	go.bytebuilders.dev/license-verifier/kubernetes v0.9.2
-	gomodules.xyz/logs v0.0.3
-	gomodules.xyz/x v0.0.7
+	gomodules.xyz/logs v0.0.4
+	gomodules.xyz/x v0.0.8
 	k8s.io/api v0.21.1
 	k8s.io/apiextensions-apiserver v0.21.1
 	k8s.io/apimachinery v0.21.1
 	k8s.io/client-go v10.0.0+incompatible
 	k8s.io/klog/v2 v2.8.0
-	kmodules.xyz/client-go v0.0.0-20210822203828-5e9cebbf1dfa
+	kmodules.xyz/client-go v0.0.0-20211028120227-48eb36f92a30
 	kubeform.dev/apimachinery v0.0.0-20210824104859-ba5604d5a1cc
 	kubeform.dev/provider-upcloud-api v0.3.1-0.20211020085925-02a788c0b00b
 	kubeform.dev/terraform-backend-sdk v0.0.0-20210922115523-21574335f0db
