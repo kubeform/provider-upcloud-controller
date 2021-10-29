@@ -1292,7 +1292,7 @@ kmodules.xyz/resource-metrics/api
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
 kubeform.dev/apimachinery/pkg/util
-# kubeform.dev/provider-upcloud-api v0.3.1-0.20211020085925-02a788c0b00b
+# kubeform.dev/provider-upcloud-api v0.4.0
 ## explicit
 kubeform.dev/provider-upcloud-api/api/provider
 kubeform.dev/provider-upcloud-api/apis/firewall
