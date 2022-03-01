@@ -416,7 +416,6 @@ func makeTfstate(resourceTypeName string, stateWithSen map[string]interface{}, o
 			ProviderConfig: "provider[\"registry.terraform.io/UpCloudLtd/upcloud\"]",
 			Instances: []instanceObjectStateV4{
 				{
-
 					AttributesRaw: stateData,
 				},
 			},
@@ -681,7 +680,6 @@ func getBackendBlock(dClient dynamic.Interface, obj *unstructured.Unstructured) 
 
 				valueStr := value.(string)
 				base64DecodedValueByte, err := base64.StdEncoding.DecodeString(valueStr)
-
 				if err != nil {
 					return nil, err
 				}

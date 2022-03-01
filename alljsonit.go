@@ -37,74 +37,72 @@ type Data struct {
 	ResourceType string
 }
 
-var (
-	allJsonIt = map[schema.GroupVersionResource]Data{
-		{
-			Group:    "firewall.upcloud.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "rules",
-		}: {
-			JsonIt:       controllers.GetJSONItr(firewallv1alpha1.GetEncoder(), firewallv1alpha1.GetDecoder()),
-			ResourceType: "upcloud_firewall_rules",
-		},
-		{
-			Group:    "floating.upcloud.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "ipaddresses",
-		}: {
-			JsonIt:       controllers.GetJSONItr(floatingv1alpha1.GetEncoder(), floatingv1alpha1.GetDecoder()),
-			ResourceType: "upcloud_floating_ip_address",
-		},
-		{
-			Group:    "network.upcloud.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "networks",
-		}: {
-			JsonIt:       controllers.GetJSONItr(networkv1alpha1.GetEncoder(), networkv1alpha1.GetDecoder()),
-			ResourceType: "upcloud_network",
-		},
-		{
-			Group:    "object.upcloud.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "storages",
-		}: {
-			JsonIt:       controllers.GetJSONItr(objectv1alpha1.GetEncoder(), objectv1alpha1.GetDecoder()),
-			ResourceType: "upcloud_object_storage",
-		},
-		{
-			Group:    "router.upcloud.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "routers",
-		}: {
-			JsonIt:       controllers.GetJSONItr(routerv1alpha1.GetEncoder(), routerv1alpha1.GetDecoder()),
-			ResourceType: "upcloud_router",
-		},
-		{
-			Group:    "server.upcloud.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "servers",
-		}: {
-			JsonIt:       controllers.GetJSONItr(serverv1alpha1.GetEncoder(), serverv1alpha1.GetDecoder()),
-			ResourceType: "upcloud_server",
-		},
-		{
-			Group:    "storage.upcloud.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "storages",
-		}: {
-			JsonIt:       controllers.GetJSONItr(storagev1alpha1.GetEncoder(), storagev1alpha1.GetDecoder()),
-			ResourceType: "upcloud_storage",
-		},
-		{
-			Group:    "tag.upcloud.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "tags",
-		}: {
-			JsonIt:       controllers.GetJSONItr(tagv1alpha1.GetEncoder(), tagv1alpha1.GetDecoder()),
-			ResourceType: "upcloud_tag",
-		},
-	}
-)
+var allJsonIt = map[schema.GroupVersionResource]Data{
+	{
+		Group:    "firewall.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "rules",
+	}: {
+		JsonIt:       controllers.GetJSONItr(firewallv1alpha1.GetEncoder(), firewallv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_firewall_rules",
+	},
+	{
+		Group:    "floating.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "ipaddresses",
+	}: {
+		JsonIt:       controllers.GetJSONItr(floatingv1alpha1.GetEncoder(), floatingv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_floating_ip_address",
+	},
+	{
+		Group:    "network.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "networks",
+	}: {
+		JsonIt:       controllers.GetJSONItr(networkv1alpha1.GetEncoder(), networkv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_network",
+	},
+	{
+		Group:    "object.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "storages",
+	}: {
+		JsonIt:       controllers.GetJSONItr(objectv1alpha1.GetEncoder(), objectv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_object_storage",
+	},
+	{
+		Group:    "router.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "routers",
+	}: {
+		JsonIt:       controllers.GetJSONItr(routerv1alpha1.GetEncoder(), routerv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_router",
+	},
+	{
+		Group:    "server.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "servers",
+	}: {
+		JsonIt:       controllers.GetJSONItr(serverv1alpha1.GetEncoder(), serverv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_server",
+	},
+	{
+		Group:    "storage.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "storages",
+	}: {
+		JsonIt:       controllers.GetJSONItr(storagev1alpha1.GetEncoder(), storagev1alpha1.GetDecoder()),
+		ResourceType: "upcloud_storage",
+	},
+	{
+		Group:    "tag.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "tags",
+	}: {
+		JsonIt:       controllers.GetJSONItr(tagv1alpha1.GetEncoder(), tagv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_tag",
+	},
+}
 
 func getJsonItAndResType(gvr schema.GroupVersionResource) Data {
 	return allJsonIt[gvr]
