@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/request"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/request"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -20,6 +20,7 @@ const numRetries = 5
 
 func resourceUpCloudObjectStorage() *schema.Resource {
 	return &schema.Resource{
+		Description:   "This resource represents an UpCloud Object Storage instance, which provides S3 compatible storage.",
 		CreateContext: resourceObjectStorageCreate,
 		ReadContext:   resourceObjectStorageRead,
 		UpdateContext: resourceObjectStorageUpdate,
@@ -78,7 +79,7 @@ func resourceUpCloudObjectStorage() *schema.Resource {
 				Computed: true,
 			},
 			bucketKey: {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -126,7 +127,7 @@ func resourceObjectStorageCreate(ctx context.Context, d *schema.ResourceData, m 
 			return diag.FromErr(err)
 		}
 
-		for _, bucketDetails := range v.([]interface{}) {
+		for _, bucketDetails := range v.(*schema.Set).List() {
 			details := bucketDetails.(map[string]interface{})
 
 			err = conn.MakeBucket(ctx, details["name"].(string), minio.MakeBucketOptions{})
@@ -152,6 +153,12 @@ func resourceObjectStorageRead(ctx context.Context, d *schema.ResourceData, m in
 	})
 
 	if err != nil {
+		if svcErr, ok := err.(*upcloud.Error); ok && svcErr.ErrorCode == upcloudObjectStorageNotFoundErrorCode {
+			var diags diag.Diagnostics
+			diags = append(diags, diagBindingRemovedWarningFromUpcloudErr(svcErr, d.Get("name").(string)))
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 
@@ -272,12 +279,12 @@ func getNewAndDeletedBucketNames(d *schema.ResourceData) ([]string, []string) {
 
 	before, after := d.GetChange(bucketKey)
 
-	for _, item := range before.([]interface{}) {
+	for _, item := range before.(*schema.Set).List() {
 		valueMap := item.(map[string]interface{})
 		beforeNames = append(beforeNames, valueMap["name"].(string))
 	}
 
-	for _, item := range after.([]interface{}) {
+	for _, item := range after.(*schema.Set).List() {
 		valueMap := item.(map[string]interface{})
 		afterNames = append(afterNames, valueMap["name"].(string))
 	}

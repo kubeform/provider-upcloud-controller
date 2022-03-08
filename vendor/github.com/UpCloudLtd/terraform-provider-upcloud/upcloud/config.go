@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/client"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/client"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 )
 
 type Config struct {
@@ -46,7 +46,7 @@ func (c *Config) checkLogin(svc *service.Service) (*upcloud.Account, error) {
 		if ok {
 			return nil, fmt.Errorf("[ERROR] Failed to get account, error was %s: '%s'", svcErr.ErrorCode, svcErr.ErrorMessage)
 		}
-		return nil, fmt.Errorf("[ERROR] Failed to get account due to unspecified error")
+		return nil, err
 	}
 
 	return res, nil

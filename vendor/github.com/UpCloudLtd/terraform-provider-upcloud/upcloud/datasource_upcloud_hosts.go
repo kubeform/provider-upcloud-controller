@@ -5,13 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceUpCloudHosts() *schema.Resource {
 	return &schema.Resource{
+		Description: `Returns a list of available UpCloud hosts. 
+		A host identifies the host server that virtual machines are run on. 
+		Only hosts on private cloud to which the calling account has access to are available through this resource.`,
 		ReadContext: dataSourceUpCloudHostsRead,
 		Schema: map[string]*schema.Schema{
 			"hosts": {

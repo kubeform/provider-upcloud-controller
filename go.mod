@@ -3,15 +3,15 @@ module kubeform.dev/provider-upcloud-controller
 go 1.16
 
 require (
-	github.com/UpCloudLtd/terraform-provider-upcloud v0.0.0-20210622112225-b693562639e1
+	github.com/UpCloudLtd/terraform-provider-upcloud v0.0.0-20220214092419-2a68e4ca5b46
 	github.com/fatih/structs v1.1.0
 	github.com/go-logr/logr v0.4.0
 	github.com/gobuffalo/flect v0.2.3
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/hcl v1.0.0
-	github.com/hashicorp/terraform-plugin-go v0.3.0
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
+	github.com/hashicorp/terraform-plugin-go v0.5.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.0
 	github.com/imdario/mergo v0.3.12
 	github.com/json-iterator/go v1.1.11
 	github.com/pkg/errors v0.9.1
@@ -28,7 +28,7 @@ require (
 	k8s.io/klog/v2 v2.8.0
 	kmodules.xyz/client-go v0.0.0-20211028120227-48eb36f92a30
 	kubeform.dev/apimachinery v0.0.0-20210824104859-ba5604d5a1cc
-	kubeform.dev/provider-upcloud-api v0.4.0
+	kubeform.dev/provider-upcloud-api v0.4.1-0.20220308120136-4e9718f56dd2
 	kubeform.dev/terraform-backend-sdk v0.0.0-20210922115523-21574335f0db
 	sigs.k8s.io/cli-utils v0.25.0
 	sigs.k8s.io/controller-runtime v0.9.0

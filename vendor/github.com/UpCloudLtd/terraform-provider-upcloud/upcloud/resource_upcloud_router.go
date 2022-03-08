@@ -4,14 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/request"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/request"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceUpCloudRouter() *schema.Resource {
 	return &schema.Resource{
+		Description: `This resource represents a generated UpCloud router resource. 
+		Routers can be used to connect multiple Private Networks. 
+		UpCloud Servers on any attached network can communicate directly with each other.`,
 		CreateContext: resourceUpCloudRouterCreate,
 		ReadContext:   resourceUpCloudRouterRead,
 		UpdateContext: resourceUpCloudRouterUpdate,
@@ -84,6 +88,11 @@ func resourceUpCloudRouterRead(ctx context.Context, d *schema.ResourceData, meta
 	router, err := client.GetRouterDetails(opts)
 
 	if err != nil {
+		if svcErr, ok := err.(*upcloud.Error); ok && svcErr.ErrorCode == upcloudRouterNotFoundErrorCode {
+			diags = append(diags, diagBindingRemovedWarningFromUpcloudErr(svcErr, d.Get("name").(string)))
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 

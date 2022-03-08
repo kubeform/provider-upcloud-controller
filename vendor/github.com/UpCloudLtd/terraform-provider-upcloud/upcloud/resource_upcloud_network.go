@@ -6,9 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/request"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/request"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -17,6 +17,7 @@ import (
 
 func resourceUpCloudNetwork() *schema.Resource {
 	return &schema.Resource{
+		Description:   "This resource represents an SDN private network that cloud servers from the same zone can be attached to.",
 		ReadContext:   resourceUpCloudNetworkRead,
 		CreateContext: resourceUpCloudNetworkCreate,
 		UpdateContext: resourceUpCloudNetworkUpdate,
@@ -110,25 +111,6 @@ func resourceUpCloudNetwork() *schema.Resource {
 				Description: "The UUID of a router",
 				Optional:    true,
 			},
-			"servers": {
-				Type:        schema.TypeSet,
-				Description: "A list of attached servers",
-				Computed:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:        schema.TypeString,
-							Description: "The UUID of the server",
-							Computed:    true,
-						},
-						"title": {
-							Type:        schema.TypeString,
-							Description: "The short description of the server",
-							Computed:    true,
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -187,6 +169,12 @@ func resourceUpCloudNetworkRead(ctx context.Context, d *schema.ResourceData, met
 
 	network, err := client.GetNetworkDetails(&req)
 	if err != nil {
+		if svcErr, ok := err.(*upcloud.Error); ok && svcErr.ErrorCode == upcloudNetworkNotFoundErrorCode {
+			var diags diag.Diagnostics
+			diags = append(diags, diagBindingRemovedWarningFromUpcloudErr(svcErr, d.Get("name").(string)))
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 

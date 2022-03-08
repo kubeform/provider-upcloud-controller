@@ -82,6 +82,13 @@ type ServerSpecNetworkInterface struct {
 	Type *string `json:"type" tf:"type"`
 }
 
+type ServerSpecSimpleBackup struct {
+	// Simple backup plan. Accepted values: dailies, weeklies, monthlies.
+	Plan *string `json:"plan" tf:"plan"`
+	// Time of the day at which backup will be taken. Should be provided in a hhmm format (e.g. 2230).
+	Time *string `json:"time" tf:"time"`
+}
+
 type ServerSpecStorageDevices struct {
 	// The device address the storage will be attached to. Specify only the bus name (ide/scsi/virtio) to auto-select next available address from that bus.
 	// +optional
@@ -107,6 +114,13 @@ type ServerSpecTemplate struct {
 	// +optional
 	Address *string `json:"address,omitempty" tf:"address"`
 	// The criteria to backup the storage
+	// 		Please keep in mind that it's not possible to have a server with backup_rule attached to a server with simple_backup specified.
+	// 		Such configurations will throw errors during execution.
+	// 		Also, due to how UpCloud API works with simple backups and how Terraform orders the update operations,
+	// 		it is advised to never switch between simple_backup on the server and individual storages backup_rules in one apply.
+	// 		If you want to switch from using server simple backup to per-storage defined backup rules,
+	// 		please first remove simple_backup block from a server, run 'terraform apply',
+	// 		then add 'backup_rule' to desired storages and run 'terraform apply' again.
 	// +optional
 	BackupRule *ServerSpecTemplateBackupRule `json:"backupRule,omitempty" tf:"backup_rule"`
 	// The unique identifier for the storage
@@ -168,6 +182,17 @@ type ServerSpecResource struct {
 	// The pricing plan used for the server
 	// +optional
 	Plan *string `json:"plan,omitempty" tf:"plan"`
+	// Simple backup schedule configuration
+	// 				The idea behind simple backups is to provide a simplified way of backing up *all* of the storages attached to a given server.
+	// 				This means you cannot have simple backup set for a server, and then some individual backup_rules on the storages attached to said server.
+	// 				Such configuration will throw an error during execution. This also apply to backup_rules set for server templates.
+	// 				Also, due to how UpCloud API works with simple backups and how Terraform orders the update operations,
+	// 				it is advised to never switch between simple_backup on the server and individual storages backup_rules in one apply.
+	// 				If you want to switch from using server simple backup to per-storage defined backup rules,
+	// 				please first remove simple_backup block from a server, run 'terraform apply',
+	// 				then add backup_rule to desired storages and run 'terraform apply' again.
+	// +optional
+	SimpleBackup *ServerSpecSimpleBackup `json:"simpleBackup,omitempty" tf:"simple_backup"`
 	// A list of storage devices associated with the server
 	// +optional
 	StorageDevices []ServerSpecStorageDevices `json:"storageDevices,omitempty" tf:"storage_devices"`
