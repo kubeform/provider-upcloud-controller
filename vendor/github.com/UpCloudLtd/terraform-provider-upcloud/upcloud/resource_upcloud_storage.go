@@ -8,19 +8,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/UpCloudLtd/terraform-provider-upcloud/internal/server"
-	"github.com/UpCloudLtd/terraform-provider-upcloud/internal/storage"
-	"github.com/UpCloudLtd/terraform-provider-upcloud/internal/utils"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/request"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/request"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/UpCloudLtd/terraform-provider-upcloud/internal/server"
+	"github.com/UpCloudLtd/terraform-provider-upcloud/internal/storage"
+	"github.com/UpCloudLtd/terraform-provider-upcloud/internal/utils"
 )
 
 func resourceUpCloudStorage() *schema.Resource {
 	return &schema.Resource{
+		Description:   "Manages UpCloud storage block devices.",
 		CreateContext: resourceUpCloudStorageCreate,
 		ReadContext:   resourceUpCloudStorageRead,
 		UpdateContext: resourceUpCloudStorageUpdate,
@@ -351,6 +353,11 @@ func resourceUpCloudStorageRead(ctx context.Context, d *schema.ResourceData, met
 	storage, err := client.GetStorageDetails(r)
 
 	if err != nil {
+		if svcErr, ok := err.(*upcloud.Error); ok && svcErr.ErrorCode == upcloudStorageNotFoundErrorCode {
+			diags = append(diags, diagBindingRemovedWarningFromUpcloudErr(svcErr, d.Get("title").(string)))
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 
@@ -370,17 +377,25 @@ func resourceUpCloudStorageRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	if storage.BackupRule != nil && storage.BackupRule.Retention > 0 {
-		backupRule := []interface{}{
-			map[string]interface{}{
-				"interval":  storage.BackupRule.Interval,
-				"time":      storage.BackupRule.Time,
-				"retention": storage.BackupRule.Retention,
-			},
-		}
+	simpleBackupEnabled, err := isStorageSimpleBackupEnabled(client, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	// Set backup_rule only if simple backup is not in use.
+	// This is to avoid conflicting backup rules when using simple_backups with server that storage is attached to
+	if !simpleBackupEnabled {
+		if storage.BackupRule != nil && storage.BackupRule.Retention > 0 {
+			backupRule := []interface{}{
+				map[string]interface{}{
+					"interval":  storage.BackupRule.Interval,
+					"time":      storage.BackupRule.Time,
+					"retention": storage.BackupRule.Retention,
+				},
+			}
 
-		if err := d.Set("backup_rule", backupRule); err != nil {
-			return diag.FromErr(err)
+			if err := d.Set("backup_rule", backupRule); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
@@ -430,10 +445,20 @@ func resourceUpCloudStorageUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	req := request.ModifyStorageRequest{
-		UUID:       d.Id(),
-		Size:       d.Get("size").(int),
-		Title:      d.Get("title").(string),
-		BackupRule: storage.BackupRule(d.Get("backup_rule.0").(map[string]interface{})),
+		UUID:  d.Id(),
+		Size:  d.Get("size").(int),
+		Title: d.Get("title").(string),
+	}
+
+	if d.HasChange("backup_rule") {
+		if br, ok := d.GetOk("backup_rule.0"); ok {
+			backupRule := storage.BackupRule(br.(map[string]interface{}))
+			if backupRule.Interval == "" {
+				req.BackupRule = &upcloud.BackupRule{}
+			} else {
+				req.BackupRule = backupRule
+			}
+		}
 	}
 
 	storageDetails, err := client.GetStorageDetails(&request.GetStorageDetailsRequest{
@@ -534,4 +559,21 @@ func resourceUpCloudStorageDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	return diags
+}
+
+func isStorageSimpleBackupEnabled(service *service.Service, storageID string) (bool, error) {
+	details, err := service.GetStorageDetails(&request.GetStorageDetailsRequest{UUID: storageID})
+	if err != nil {
+		return false, err
+	}
+	for _, srvID := range details.ServerUUIDs {
+		srv, err := service.GetServerDetails(&request.GetServerDetailsRequest{UUID: srvID})
+		if err != nil {
+			return false, err
+		}
+		if srv.SimpleBackup != "no" {
+			return true, nil
+		}
+	}
+	return false, nil
 }

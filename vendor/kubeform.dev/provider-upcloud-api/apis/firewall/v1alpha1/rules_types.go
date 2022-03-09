@@ -55,10 +55,10 @@ type RulesSpecFirewallRule struct {
 	DestinationAddressStart *string `json:"destinationAddressStart,omitempty" tf:"destination_address_start"`
 	// The destination port range ends from this port number
 	// +optional
-	DestinationPortEnd *int64 `json:"destinationPortEnd,omitempty" tf:"destination_port_end"`
+	DestinationPortEnd *string `json:"destinationPortEnd,omitempty" tf:"destination_port_end"`
 	// The destination port range starts from this port number
 	// +optional
-	DestinationPortStart *int64 `json:"destinationPortStart,omitempty" tf:"destination_port_start"`
+	DestinationPortStart *string `json:"destinationPortStart,omitempty" tf:"destination_port_start"`
 	// The direction of network traffic this rule will be applied to
 	Direction *string `json:"direction" tf:"direction"`
 	// The address family of new firewall rule
@@ -77,10 +77,10 @@ type RulesSpecFirewallRule struct {
 	SourceAddressStart *string `json:"sourceAddressStart,omitempty" tf:"source_address_start"`
 	// The source port range ends from this port number
 	// +optional
-	SourcePortEnd *int64 `json:"sourcePortEnd,omitempty" tf:"source_port_end"`
+	SourcePortEnd *string `json:"sourcePortEnd,omitempty" tf:"source_port_end"`
 	// The source port range starts from this port number
 	// +optional
-	SourcePortStart *int64 `json:"sourcePortStart,omitempty" tf:"source_port_start"`
+	SourcePortStart *string `json:"sourcePortStart,omitempty" tf:"source_port_start"`
 }
 
 type RulesSpec struct {

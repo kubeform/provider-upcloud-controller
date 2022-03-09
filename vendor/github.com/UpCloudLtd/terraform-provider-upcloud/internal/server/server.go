@@ -5,19 +5,19 @@ import (
 	"log"
 	"time"
 
-	"github.com/UpCloudLtd/terraform-provider-upcloud/internal/storage"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/request"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/request"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/UpCloudLtd/terraform-provider-upcloud/internal/storage"
 )
 
 func BuildServerOpts(d *schema.ResourceData, meta interface{}) (*request.CreateServerRequest, error) {
 	r := &request.CreateServerRequest{
 		Zone:     d.Get("zone").(string),
 		Hostname: d.Get("hostname").(string),
-		Title:    fmt.Sprintf("%s (managed by terraform)", d.Get("hostname").(string)),
 	}
 
 	if attr, ok := d.GetOk("firewall"); ok {
@@ -45,6 +45,10 @@ func BuildServerOpts(d *schema.ResourceData, meta interface{}) (*request.CreateS
 	}
 	if attr, ok := d.GetOk("plan"); ok {
 		r.Plan = attr.(string)
+	}
+	if attr, ok := d.GetOk("simple_backup"); ok {
+		simpleBackupAttrs := attr.(*schema.Set).List()[0].(map[string]interface{})
+		r.SimpleBackup = BuildSimpleBackupOpts(simpleBackupAttrs)
 	}
 	if login, ok := d.GetOk("login"); ok {
 		loginOpts, deliveryMethod, err := buildLoginOpts(login, meta)
@@ -119,6 +123,16 @@ func BuildServerOpts(d *schema.ResourceData, meta interface{}) (*request.CreateS
 	}
 
 	return r, nil
+}
+
+func BuildSimpleBackupOpts(attrs map[string]interface{}) string {
+	if time, ok := attrs["time"]; ok {
+		if plan, ok := attrs["plan"]; ok {
+			return fmt.Sprintf("%s,%s", time, plan)
+		}
+	}
+
+	return "no"
 }
 
 func buildLoginOpts(v interface{}, meta interface{}) (*request.LoginUser, string, error) {

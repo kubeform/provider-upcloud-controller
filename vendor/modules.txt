@@ -47,19 +47,20 @@ github.com/Masterminds/sprig
 github.com/PuerkitoBio/purell
 # github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
 github.com/PuerkitoBio/urlesc
-# github.com/UpCloudLtd/terraform-provider-upcloud v0.0.0-20210622112225-b693562639e1
+# github.com/UpCloudLtd/terraform-provider-upcloud v0.0.0-20220214092419-2a68e4ca5b46
 ## explicit
 github.com/UpCloudLtd/terraform-provider-upcloud/internal/config
 github.com/UpCloudLtd/terraform-provider-upcloud/internal/server
 github.com/UpCloudLtd/terraform-provider-upcloud/internal/storage
 github.com/UpCloudLtd/terraform-provider-upcloud/internal/utils
 github.com/UpCloudLtd/terraform-provider-upcloud/upcloud
-# github.com/UpCloudLtd/upcloud-go-api v0.0.0-20210525102709-661419a1956b
-github.com/UpCloudLtd/upcloud-go-api/internal
-github.com/UpCloudLtd/upcloud-go-api/upcloud
-github.com/UpCloudLtd/upcloud-go-api/upcloud/client
-github.com/UpCloudLtd/upcloud-go-api/upcloud/request
-github.com/UpCloudLtd/upcloud-go-api/upcloud/service
+github.com/UpCloudLtd/terraform-provider-upcloud/upcloud/upcloudschema
+# github.com/UpCloudLtd/upcloud-go-api/v4 v4.1.3
+github.com/UpCloudLtd/upcloud-go-api/v4/internal
+github.com/UpCloudLtd/upcloud-go-api/v4/upcloud
+github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/client
+github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/request
+github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service
 # github.com/agext/levenshtein v1.2.3
 github.com/agext/levenshtein
 # github.com/apparentlymart/go-cidr v1.1.0
@@ -153,7 +154,7 @@ github.com/cloudevents/sdk-go/v2/event/datacodec/xml
 github.com/cloudevents/sdk-go/v2/protocol
 github.com/cloudevents/sdk-go/v2/protocol/http
 github.com/cloudevents/sdk-go/v2/types
-# github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
+# github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
 github.com/coreos/go-systemd/journal
 # github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f
 github.com/coreos/pkg/capnslog
@@ -199,9 +200,11 @@ github.com/golang/protobuf/internal/gengogrpc
 github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/protoc-gen-go
+github.com/golang/protobuf/protoc-gen-go/descriptor
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
+github.com/golang/protobuf/ptypes/empty
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/google/go-cmp v0.5.6
 github.com/google/go-cmp/cmp
@@ -252,6 +255,8 @@ github.com/hashicorp/errwrap
 # github.com/hashicorp/go-azure-helpers v0.14.0
 github.com/hashicorp/go-azure-helpers/authentication
 github.com/hashicorp/go-azure-helpers/sender
+# github.com/hashicorp/go-checkpoint v0.5.0
+github.com/hashicorp/go-checkpoint
 # github.com/hashicorp/go-cleanhttp v0.5.2
 github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
@@ -265,12 +270,15 @@ github.com/hashicorp/go-cty/cty/set
 # github.com/hashicorp/go-getter v1.5.3
 github.com/hashicorp/go-getter
 github.com/hashicorp/go-getter/helper/url
-# github.com/hashicorp/go-hclog v0.16.0
+# github.com/hashicorp/go-hclog v0.16.1
 github.com/hashicorp/go-hclog
 # github.com/hashicorp/go-immutable-radix v1.0.0
 github.com/hashicorp/go-immutable-radix
 # github.com/hashicorp/go-multierror v1.1.1
 github.com/hashicorp/go-multierror
+# github.com/hashicorp/go-plugin v1.4.1
+github.com/hashicorp/go-plugin
+github.com/hashicorp/go-plugin/internal/plugin
 # github.com/hashicorp/go-retryablehttp v0.6.8
 github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-rootcerts v1.0.2
@@ -285,6 +293,21 @@ github.com/hashicorp/go-version
 # github.com/hashicorp/golang-lru v0.5.4
 github.com/hashicorp/golang-lru
 github.com/hashicorp/golang-lru/simplelru
+# github.com/hashicorp/hc-install v0.3.1
+github.com/hashicorp/hc-install
+github.com/hashicorp/hc-install/checkpoint
+github.com/hashicorp/hc-install/errors
+github.com/hashicorp/hc-install/fs
+github.com/hashicorp/hc-install/internal/build
+github.com/hashicorp/hc-install/internal/httpclient
+github.com/hashicorp/hc-install/internal/pubkey
+github.com/hashicorp/hc-install/internal/releasesjson
+github.com/hashicorp/hc-install/internal/src
+github.com/hashicorp/hc-install/internal/validators
+github.com/hashicorp/hc-install/internal/version
+github.com/hashicorp/hc-install/product
+github.com/hashicorp/hc-install/releases
+github.com/hashicorp/hc-install/src
 # github.com/hashicorp/hcl v1.0.0
 ## explicit
 github.com/hashicorp/hcl/hcl/ast
@@ -308,15 +331,37 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
+# github.com/hashicorp/logutils v1.0.0
+github.com/hashicorp/logutils
 # github.com/hashicorp/serf v0.9.5
 github.com/hashicorp/serf/coordinate
-# github.com/hashicorp/terraform-plugin-go v0.3.0
+# github.com/hashicorp/terraform-exec v0.15.0
+github.com/hashicorp/terraform-exec/internal/version
+github.com/hashicorp/terraform-exec/tfexec
+# github.com/hashicorp/terraform-json v0.13.0
+github.com/hashicorp/terraform-json
+# github.com/hashicorp/terraform-plugin-go v0.5.0
 ## explicit
 github.com/hashicorp/terraform-plugin-go/tfprotov5
+github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/fromproto
+github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/tfplugin5
+github.com/hashicorp/terraform-plugin-go/tfprotov5/internal/toproto
+github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server
+github.com/hashicorp/terraform-plugin-go/tfprotov6
+github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/fromproto
+github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6
+github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/toproto
+github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server
 github.com/hashicorp/terraform-plugin-go/tftypes
-# github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
+# github.com/hashicorp/terraform-plugin-log v0.2.0
+github.com/hashicorp/terraform-plugin-log/internal/logging
+github.com/hashicorp/terraform-plugin-log/tflog
+github.com/hashicorp/terraform-plugin-log/tfsdklog
+# github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.0
 ## explicit
 github.com/hashicorp/terraform-plugin-sdk/v2/diag
+github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging
+github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation
@@ -326,13 +371,19 @@ github.com/hashicorp/terraform-plugin-sdk/v2/internal/configs/hcl2shim
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/helper/hashcode
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/plans/objchange
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/plugin/convert
+github.com/hashicorp/terraform-plugin-sdk/v2/internal/plugintest
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/tfdiags
 github.com/hashicorp/terraform-plugin-sdk/v2/meta
+github.com/hashicorp/terraform-plugin-sdk/v2/plugin
 github.com/hashicorp/terraform-plugin-sdk/v2/terraform
+# github.com/hashicorp/terraform-registry-address v0.0.0-20210412075316-9b2996cce896
+github.com/hashicorp/terraform-registry-address
 # github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734
 github.com/hashicorp/terraform-svchost
 github.com/hashicorp/terraform-svchost/auth
 github.com/hashicorp/terraform-svchost/disco
+# github.com/hashicorp/yamux v0.0.0-20210316155119-a95892c5f864
+github.com/hashicorp/yamux
 # github.com/huandu/xstrings v1.3.2
 github.com/huandu/xstrings
 # github.com/imdario/mergo v0.3.12 => github.com/imdario/mergo v0.3.5
@@ -365,7 +416,7 @@ github.com/klauspost/compress/zstd
 github.com/klauspost/compress/zstd/internal/xxhash
 # github.com/klauspost/cpuid/v2 v2.0.6
 github.com/klauspost/cpuid/v2
-# github.com/lib/pq v1.8.0
+# github.com/lib/pq v1.10.2
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
@@ -431,6 +482,8 @@ github.com/nats-io/nats.go/util
 github.com/nats-io/nkeys
 # github.com/nats-io/nuid v1.0.1
 github.com/nats-io/nuid
+# github.com/oklog/run v1.1.0
+github.com/oklog/run
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
@@ -554,7 +607,7 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
+# golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 golang.org/x/crypto/argon2
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blake2b
@@ -562,6 +615,7 @@ golang.org/x/crypto/blowfish
 golang.org/x/crypto/cast5
 golang.org/x/crypto/chacha20
 golang.org/x/crypto/curve25519
+golang.org/x/crypto/curve25519/internal/field
 golang.org/x/crypto/ed25519
 golang.org/x/crypto/ed25519/internal/edwards25519
 golang.org/x/crypto/internal/subtle
@@ -612,7 +666,7 @@ golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d
 golang.org/x/term
-# golang.org/x/text v0.3.6
+# golang.org/x/text v0.3.7
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/ianaindex
@@ -742,6 +796,8 @@ google.golang.org/grpc/credentials
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
+google.golang.org/grpc/health
+google.golang.org/grpc/health/grpc_health_v1
 google.golang.org/grpc/internal
 google.golang.org/grpc/internal/backoff
 google.golang.org/grpc/internal/balancerload
@@ -763,6 +819,8 @@ google.golang.org/grpc/internal/transport
 google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
 google.golang.org/grpc/peer
+google.golang.org/grpc/reflection
+google.golang.org/grpc/reflection/grpc_reflection_v1alpha
 google.golang.org/grpc/resolver
 google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
@@ -803,6 +861,7 @@ google.golang.org/protobuf/runtime/protoimpl
 google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
+google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/pluginpb
 # gopkg.in/inf.v0 v0.9.1
@@ -1292,13 +1351,15 @@ kmodules.xyz/resource-metrics/api
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
 kubeform.dev/apimachinery/pkg/util
-# kubeform.dev/provider-upcloud-api v0.4.0
+# kubeform.dev/provider-upcloud-api v0.4.1-0.20220308121236-f571f41a14dd
 ## explicit
 kubeform.dev/provider-upcloud-api/api/provider
 kubeform.dev/provider-upcloud-api/apis/firewall
 kubeform.dev/provider-upcloud-api/apis/firewall/v1alpha1
 kubeform.dev/provider-upcloud-api/apis/floating
 kubeform.dev/provider-upcloud-api/apis/floating/v1alpha1
+kubeform.dev/provider-upcloud-api/apis/managed
+kubeform.dev/provider-upcloud-api/apis/managed/v1alpha1
 kubeform.dev/provider-upcloud-api/apis/network
 kubeform.dev/provider-upcloud-api/apis/network/v1alpha1
 kubeform.dev/provider-upcloud-api/apis/object

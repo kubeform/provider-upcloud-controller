@@ -59,15 +59,6 @@ type NetworkSpecIpNetwork struct {
 	Gateway *string `json:"gateway,omitempty" tf:"gateway"`
 }
 
-type NetworkSpecServers struct {
-	// The UUID of the server
-	// +optional
-	ID *string `json:"ID,omitempty" tf:"id"`
-	// The short description of the server
-	// +optional
-	Title *string `json:"title,omitempty" tf:"title"`
-}
-
 type NetworkSpec struct {
 	State *NetworkSpecResource `json:"state,omitempty" tf:"-"`
 
@@ -92,9 +83,6 @@ type NetworkSpecResource struct {
 	// The UUID of a router
 	// +optional
 	Router *string `json:"router,omitempty" tf:"router"`
-	// A list of attached servers
-	// +optional
-	Servers []NetworkSpecServers `json:"servers,omitempty" tf:"servers"`
 	// The network type
 	// +optional
 	Type *string `json:"type,omitempty" tf:"type"`

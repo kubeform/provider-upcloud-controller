@@ -4,13 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceUpCloudIPAddresses() *schema.Resource {
 	return &schema.Resource{
+		Description: "Returns a set of IP Addresses that are associated with the UpCloud account.",
 		ReadContext: dataSourceUpCloudIPAddressesRead,
 		Schema: map[string]*schema.Schema{
 			"addresses": {

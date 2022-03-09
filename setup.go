@@ -41,6 +41,7 @@ import (
 	"k8s.io/klog/v2"
 	firewallv1alpha1 "kubeform.dev/provider-upcloud-api/apis/firewall/v1alpha1"
 	floatingv1alpha1 "kubeform.dev/provider-upcloud-api/apis/floating/v1alpha1"
+	managedv1alpha1 "kubeform.dev/provider-upcloud-api/apis/managed/v1alpha1"
 	networkv1alpha1 "kubeform.dev/provider-upcloud-api/apis/network/v1alpha1"
 	objectv1alpha1 "kubeform.dev/provider-upcloud-api/apis/object/v1alpha1"
 	routerv1alpha1 "kubeform.dev/provider-upcloud-api/apis/router/v1alpha1"
@@ -49,6 +50,7 @@ import (
 	tagv1alpha1 "kubeform.dev/provider-upcloud-api/apis/tag/v1alpha1"
 	controllersfirewall "kubeform.dev/provider-upcloud-controller/controllers/firewall"
 	controllersfloating "kubeform.dev/provider-upcloud-controller/controllers/floating"
+	controllersmanaged "kubeform.dev/provider-upcloud-controller/controllers/managed"
 	controllersnetwork "kubeform.dev/provider-upcloud-controller/controllers/network"
 	controllersobject "kubeform.dev/provider-upcloud-controller/controllers/object"
 	controllersrouter "kubeform.dev/provider-upcloud-controller/controllers/router"
@@ -276,6 +278,74 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 			return err
 		}
 	case schema.GroupVersionKind{
+		Group:   "managed.upcloud.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DatabaseLogicalDatabase",
+	}:
+		if err := (&controllersmanaged.DatabaseLogicalDatabaseReconciler{
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("DatabaseLogicalDatabase"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["upcloud_managed_database_logical_database"],
+			TypeName: "upcloud_managed_database_logical_database",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "DatabaseLogicalDatabase")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "managed.upcloud.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DatabaseMysql",
+	}:
+		if err := (&controllersmanaged.DatabaseMysqlReconciler{
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("DatabaseMysql"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["upcloud_managed_database_mysql"],
+			TypeName: "upcloud_managed_database_mysql",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "DatabaseMysql")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "managed.upcloud.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DatabasePostgresql",
+	}:
+		if err := (&controllersmanaged.DatabasePostgresqlReconciler{
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("DatabasePostgresql"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["upcloud_managed_database_postgresql"],
+			TypeName: "upcloud_managed_database_postgresql",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "DatabasePostgresql")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "managed.upcloud.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DatabaseUser",
+	}:
+		if err := (&controllersmanaged.DatabaseUserReconciler{
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("DatabaseUser"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["upcloud_managed_database_user"],
+			TypeName: "upcloud_managed_database_user",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "DatabaseUser")
+			return err
+		}
+	case schema.GroupVersionKind{
 		Group:   "network.upcloud.kubeform.com",
 		Version: "v1alpha1",
 		Kind:    "Network",
@@ -403,6 +473,42 @@ func SetupWebhook(mgr manager.Manager, gvk schema.GroupVersionKind) error {
 	}:
 		if err := (&floatingv1alpha1.IpAddress{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "IpAddress")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "managed.upcloud.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DatabaseLogicalDatabase",
+	}:
+		if err := (&managedv1alpha1.DatabaseLogicalDatabase{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DatabaseLogicalDatabase")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "managed.upcloud.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DatabaseMysql",
+	}:
+		if err := (&managedv1alpha1.DatabaseMysql{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DatabaseMysql")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "managed.upcloud.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DatabasePostgresql",
+	}:
+		if err := (&managedv1alpha1.DatabasePostgresql{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DatabasePostgresql")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "managed.upcloud.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DatabaseUser",
+	}:
+		if err := (&managedv1alpha1.DatabaseUser{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DatabaseUser")
 			return err
 		}
 	case schema.GroupVersionKind{

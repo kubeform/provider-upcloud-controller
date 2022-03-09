@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	firewallv1alpha1 "kubeform.dev/provider-upcloud-api/apis/firewall/v1alpha1"
 	floatingv1alpha1 "kubeform.dev/provider-upcloud-api/apis/floating/v1alpha1"
+	managedv1alpha1 "kubeform.dev/provider-upcloud-api/apis/managed/v1alpha1"
 	networkv1alpha1 "kubeform.dev/provider-upcloud-api/apis/network/v1alpha1"
 	objectv1alpha1 "kubeform.dev/provider-upcloud-api/apis/object/v1alpha1"
 	routerv1alpha1 "kubeform.dev/provider-upcloud-api/apis/router/v1alpha1"
@@ -53,6 +54,38 @@ var allJsonIt = map[schema.GroupVersionResource]Data{
 	}: {
 		JsonIt:       controllers.GetJSONItr(floatingv1alpha1.GetEncoder(), floatingv1alpha1.GetDecoder()),
 		ResourceType: "upcloud_floating_ip_address",
+	},
+	{
+		Group:    "managed.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "databaselogicaldatabases",
+	}: {
+		JsonIt:       controllers.GetJSONItr(managedv1alpha1.GetEncoder(), managedv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_managed_database_logical_database",
+	},
+	{
+		Group:    "managed.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "databasemysqls",
+	}: {
+		JsonIt:       controllers.GetJSONItr(managedv1alpha1.GetEncoder(), managedv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_managed_database_mysql",
+	},
+	{
+		Group:    "managed.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "databasepostgresqls",
+	}: {
+		JsonIt:       controllers.GetJSONItr(managedv1alpha1.GetEncoder(), managedv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_managed_database_postgresql",
+	},
+	{
+		Group:    "managed.upcloud.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "databaseusers",
+	}: {
+		JsonIt:       controllers.GetJSONItr(managedv1alpha1.GetEncoder(), managedv1alpha1.GetDecoder()),
+		ResourceType: "upcloud_managed_database_user",
 	},
 	{
 		Group:    "network.upcloud.kubeform.com",
