@@ -21,6 +21,7 @@ package scheme
 import (
 	firewallv1alpha1 "kubeform.dev/provider-upcloud-api/apis/firewall/v1alpha1"
 	floatingv1alpha1 "kubeform.dev/provider-upcloud-api/apis/floating/v1alpha1"
+	managedv1alpha1 "kubeform.dev/provider-upcloud-api/apis/managed/v1alpha1"
 	networkv1alpha1 "kubeform.dev/provider-upcloud-api/apis/network/v1alpha1"
 	objectv1alpha1 "kubeform.dev/provider-upcloud-api/apis/object/v1alpha1"
 	routerv1alpha1 "kubeform.dev/provider-upcloud-api/apis/router/v1alpha1"
@@ -41,6 +42,7 @@ var ParameterCodec = runtime.NewParameterCodec(Scheme)
 var localSchemeBuilder = runtime.SchemeBuilder{
 	firewallv1alpha1.AddToScheme,
 	floatingv1alpha1.AddToScheme,
+	managedv1alpha1.AddToScheme,
 	networkv1alpha1.AddToScheme,
 	objectv1alpha1.AddToScheme,
 	routerv1alpha1.AddToScheme,

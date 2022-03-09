@@ -3,9 +3,9 @@ package upcloud
 import (
 	"context"
 
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/request"
-	"github.com/UpCloudLtd/upcloud-go-api/upcloud/service"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/request"
+	"github.com/UpCloudLtd/upcloud-go-api/v4/upcloud/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -13,6 +13,7 @@ import (
 
 func resourceUpCloudFloatingIPAddress() *schema.Resource {
 	return &schema.Resource{
+		Description:   "This resource represents a UpCloud floating IP address resource.",
 		CreateContext: resourceUpCloudFloatingIPAddressCreate,
 		ReadContext:   resourceUpCloudFloatingIPAddressRead,
 		UpdateContext: resourceUpCloudFloatingIPAddressUpdate,
@@ -103,6 +104,15 @@ func resourceUpCloudFloatingIPAddressRead(ctx context.Context, d *schema.Resourc
 	ipAddress, err := client.GetIPAddressDetails(getIPAddressDetailsRequest)
 
 	if err != nil {
+		if svcErr, ok := err.(*upcloud.Error); ok && svcErr.ErrorCode == upcloudIPAddressNotFoundErrorCode {
+			name := "ip address" // set default name because ip_address is optional field
+			if ip, ok := d.GetOk("ip_address"); ok {
+				name = ip.(string)
+			}
+			diags = append(diags, diagBindingRemovedWarningFromUpcloudErr(svcErr, name))
+			d.SetId("")
+			return diags
+		}
 		diag.FromErr(err)
 	}
 

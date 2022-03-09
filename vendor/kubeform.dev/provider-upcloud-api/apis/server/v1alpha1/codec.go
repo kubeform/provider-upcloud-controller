@@ -28,6 +28,7 @@ import (
 func GetEncoder() map[string]jsoniter.ValEncoder {
 	return map[string]jsoniter.ValEncoder{
 		jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecLogin{}).Type1()):              ServerSpecLoginCodec{},
+		jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecSimpleBackup{}).Type1()):       ServerSpecSimpleBackupCodec{},
 		jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecTemplate{}).Type1()):           ServerSpecTemplateCodec{},
 		jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecTemplateBackupRule{}).Type1()): ServerSpecTemplateBackupRuleCodec{},
 	}
@@ -36,6 +37,7 @@ func GetEncoder() map[string]jsoniter.ValEncoder {
 func GetDecoder() map[string]jsoniter.ValDecoder {
 	return map[string]jsoniter.ValDecoder{
 		jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecLogin{}).Type1()):              ServerSpecLoginCodec{},
+		jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecSimpleBackup{}).Type1()):       ServerSpecSimpleBackupCodec{},
 		jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecTemplate{}).Type1()):           ServerSpecTemplateCodec{},
 		jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecTemplateBackupRule{}).Type1()): ServerSpecTemplateBackupRuleCodec{},
 	}
@@ -129,6 +131,85 @@ func (ServerSpecLoginCodec) Decode(ptr unsafe.Pointer, iter *jsoniter.Iterator) 
 		}
 	default:
 		iter.ReportError("decode ServerSpecLogin", "unexpected JSON type")
+	}
+}
+
+// +k8s:deepcopy-gen=false
+type ServerSpecSimpleBackupCodec struct {
+}
+
+func (ServerSpecSimpleBackupCodec) IsEmpty(ptr unsafe.Pointer) bool {
+	return (*ServerSpecSimpleBackup)(ptr) == nil
+}
+
+func (ServerSpecSimpleBackupCodec) Encode(ptr unsafe.Pointer, stream *jsoniter.Stream) {
+	obj := (*ServerSpecSimpleBackup)(ptr)
+	var objs []ServerSpecSimpleBackup
+	if obj != nil {
+		objs = []ServerSpecSimpleBackup{*obj}
+	}
+
+	jsonit := jsoniter.Config{
+		EscapeHTML:             true,
+		SortMapKeys:            true,
+		ValidateJsonRawMessage: true,
+		TagKey:                 "tf",
+		TypeEncoders:           getEncodersWithout(jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecSimpleBackup{}).Type1())),
+	}.Froze()
+
+	byt, _ := jsonit.Marshal(objs)
+
+	stream.Write(byt)
+}
+
+func (ServerSpecSimpleBackupCodec) Decode(ptr unsafe.Pointer, iter *jsoniter.Iterator) {
+	switch iter.WhatIsNext() {
+	case jsoniter.NilValue:
+		iter.Skip()
+		*(*ServerSpecSimpleBackup)(ptr) = ServerSpecSimpleBackup{}
+		return
+	case jsoniter.ArrayValue:
+		objsByte := iter.SkipAndReturnBytes()
+		if len(objsByte) > 0 {
+			var objs []ServerSpecSimpleBackup
+
+			jsonit := jsoniter.Config{
+				EscapeHTML:             true,
+				SortMapKeys:            true,
+				ValidateJsonRawMessage: true,
+				TagKey:                 "tf",
+				TypeDecoders:           getDecodersWithout(jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecSimpleBackup{}).Type1())),
+			}.Froze()
+			jsonit.Unmarshal(objsByte, &objs)
+
+			if len(objs) > 0 {
+				*(*ServerSpecSimpleBackup)(ptr) = objs[0]
+			} else {
+				*(*ServerSpecSimpleBackup)(ptr) = ServerSpecSimpleBackup{}
+			}
+		} else {
+			*(*ServerSpecSimpleBackup)(ptr) = ServerSpecSimpleBackup{}
+		}
+	case jsoniter.ObjectValue:
+		objByte := iter.SkipAndReturnBytes()
+		if len(objByte) > 0 {
+			var obj ServerSpecSimpleBackup
+
+			jsonit := jsoniter.Config{
+				EscapeHTML:             true,
+				SortMapKeys:            true,
+				ValidateJsonRawMessage: true,
+				TagKey:                 "tf",
+				TypeDecoders:           getDecodersWithout(jsoniter.MustGetKind(reflect2.TypeOf(ServerSpecSimpleBackup{}).Type1())),
+			}.Froze()
+			jsonit.Unmarshal(objByte, &obj)
+
+			*(*ServerSpecSimpleBackup)(ptr) = obj
+		} else {
+			*(*ServerSpecSimpleBackup)(ptr) = ServerSpecSimpleBackup{}
+		}
+	default:
+		iter.ReportError("decode ServerSpecSimpleBackup", "unexpected JSON type")
 	}
 }
 

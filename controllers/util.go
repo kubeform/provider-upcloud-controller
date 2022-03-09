@@ -873,7 +873,7 @@ func hasResourceChanged(combineRaw map[string]interface{}, copyrawStatus map[str
 	stateVal := HCL2ValueFromConfigValue(copyrawStatus)
 	proposedPlanVal := HCL2ValueFromConfigValue(combineRaw)
 
-	diff, err := tfschema.DiffFromValues(context.TODO(), stateVal, proposedPlanVal, stripResourceModifiers(res))
+	diff, err := tfschema.DiffFromValues(context.TODO(), stateVal, proposedPlanVal, cty.NilVal, stripResourceModifiers(res))
 	if err != nil {
 		return false, err
 	}
@@ -902,6 +902,9 @@ func checkRequireNewOrNot(combineRaw map[string]interface{}, copyrawStatus map[s
 			MsgPack: priorState,
 		},
 		ProposedNewState: &tfprotov5.DynamicValue{
+			MsgPack: plannedState,
+		},
+		Config: &tfprotov5.DynamicValue{
 			MsgPack: plannedState,
 		},
 	}
@@ -942,6 +945,9 @@ func createTheObject(rawSpec map[string]interface{}, res *tfschema.Resource, ser
 			MsgPack: priorState,
 		},
 		ProposedNewState: &tfprotov5.DynamicValue{
+			MsgPack: plannedState,
+		},
+		Config: &tfprotov5.DynamicValue{
 			MsgPack: plannedState,
 		},
 	}
@@ -1005,6 +1011,9 @@ func destroyTheObject(rawStatus map[string]interface{}, res *tfschema.Resource, 
 			MsgPack: priorState,
 		},
 		ProposedNewState: &tfprotov5.DynamicValue{
+			MsgPack: plannedState,
+		},
+		Config: &tfprotov5.DynamicValue{
 			MsgPack: plannedState,
 		},
 	}

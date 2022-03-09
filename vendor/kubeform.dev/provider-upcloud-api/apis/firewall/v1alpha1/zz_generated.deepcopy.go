@@ -141,12 +141,12 @@ func (in *RulesSpecFirewallRule) DeepCopyInto(out *RulesSpecFirewallRule) {
 	}
 	if in.DestinationPortEnd != nil {
 		in, out := &in.DestinationPortEnd, &out.DestinationPortEnd
-		*out = new(int64)
+		*out = new(string)
 		**out = **in
 	}
 	if in.DestinationPortStart != nil {
 		in, out := &in.DestinationPortStart, &out.DestinationPortStart
-		*out = new(int64)
+		*out = new(string)
 		**out = **in
 	}
 	if in.Direction != nil {
@@ -181,12 +181,12 @@ func (in *RulesSpecFirewallRule) DeepCopyInto(out *RulesSpecFirewallRule) {
 	}
 	if in.SourcePortEnd != nil {
 		in, out := &in.SourcePortEnd, &out.SourcePortEnd
-		*out = new(int64)
+		*out = new(string)
 		**out = **in
 	}
 	if in.SourcePortStart != nil {
 		in, out := &in.SourcePortStart, &out.SourcePortStart
-		*out = new(int64)
+		*out = new(string)
 		**out = **in
 	}
 	return
